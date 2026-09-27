@@ -43,7 +43,9 @@ button:disabled {
 .shell {
   display: grid;
   grid-template-rows: auto 1fr;
+  width: 70vw;
   height: 100vh;
+  margin: 0 auto;
   overflow: hidden;
   background: #f2f4f7;
 }
@@ -169,6 +171,10 @@ button:disabled {
 }
 
 @media (max-width: 900px) {
+  .shell {
+    width: 100vw;
+  }
+
   .header {
     grid-template-columns: 1fr;
   }
