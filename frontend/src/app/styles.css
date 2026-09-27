@@ -43,7 +43,7 @@ button:disabled {
 .shell {
   display: grid;
   grid-template-rows: auto 1fr;
-  width: 70vw;
+  width: 60vw;
   height: 100vh;
   margin: 0 auto;
   overflow: hidden;

@@ -46,7 +46,7 @@ export function App() {
       }
       setCalculated(false);
       setCalculationResult(null);
-      setStatus("Броски загружены. Когда готовы оба участника, запустите подсчет.");
+      setStatus("Броски загружены. Запустите подсчет");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось сгенерировать броски");
     } finally {
@@ -218,11 +218,11 @@ async function readError(response: Response) {
 function formatResult(result: CalculationResult) {
   if (result.winner === "Ничья") {
     return result.winningStep === null
-      ? "Ничья. Никто не набрал 30 очков за 10 ходов."
-      : `Ничья. Оба участника набрали 30 очков на ходе #${result.winningStep}.`;
+      ? "Ничья. Никто не набрал 30 очков за 10 ходов"
+      : `Ничья. Оба участника набрали 30 очков на ходе #${result.winningStep}`;
   }
 
-  return `🏆 Победитель: ${formatWinnerName(result.winner)}! Набрал 30 очков за ${result.winningStep} ходов.`;
+  return `🏆 Победитель: ${formatWinnerName(result.winner)}! Набрал 30 очков за ${result.winningStep} ходов`;
 }
 
 function formatWinnerName(winner: string) {
