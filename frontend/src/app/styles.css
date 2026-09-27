@@ -133,13 +133,6 @@ button:disabled {
   text-align: center;
 }
 
-.player h2 span {
-  display: block;
-  margin-top: 6px;
-  color: #536173;
-  font-size: 0.55em;
-}
-
 .generate {
   justify-self: center;
   width: min(100%, 310px);

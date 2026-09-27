@@ -1,48 +1,43 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+import { calculateRound, generateRolls, startNextRound } from "./api/roundApi";
+import { PartitionPanel } from "./components/PartitionPanel";
+import { INITIAL_STATUS, ROLLS_PER_PARTITION } from "./constants";
+import { useRound } from "./hooks/useRound";
+import type { CalculationResult, Partition, PlayerId } from "./types";
+import { toPartition } from "./utils/partitions";
+import { formatResult, getHighlightedStep } from "./utils/results";
 
 import "./styles.css";
 
-type CalculationResult = {
-  winner: string;
-  winningStep: number | null;
-};
-
-type PlayerId = 1 | 2;
-
-const initialStatus = "Сгенерируйте броски (по 10 для каждого)";
-
 export function App() {
   const [round, setRound] = useRound();
-  const [playerOneRolls, setPlayerOneRolls] = useState<number[]>([]);
-  const [playerTwoRolls, setPlayerTwoRolls] = useState<number[]>([]);
-  const [loadingPlayer, setLoadingPlayer] = useState<PlayerId | null>(null);
+  const [partitionZeroRolls, setPartitionZeroRolls] = useState<number[]>([]);
+  const [partitionOneRolls, setPartitionOneRolls] = useState<number[]>([]);
+  const [loadingPartition, setLoadingPartition] = useState<Partition | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isStartingRound, setIsStartingRound] = useState(false);
   const [calculated, setCalculated] = useState(false);
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
-  const [status, setStatus] = useState(initialStatus);
+  const [status, setStatus] = useState(INITIAL_STATUS);
 
   const canCalculate =
-    playerOneRolls.length === 10 &&
-    playerTwoRolls.length === 10 &&
+    partitionZeroRolls.length === ROLLS_PER_PARTITION &&
+    partitionOneRolls.length === ROLLS_PER_PARTITION &&
     !calculated &&
     !isCalculating;
 
   async function generate(playerId: PlayerId) {
-    setLoadingPlayer(playerId);
-    setStatus(`Генерируются броски для Партиция ${playerId - 1}...`);
+    const partition = toPartition(playerId);
+    setLoadingPartition(partition);
+    setStatus(`Генерируются броски для Партиция ${partition}...`);
 
     try {
-      const response = await fetch(`/api/generate/${playerId}`, { method: "POST" });
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      const rolls = (await response.json()) as number[];
-      if (playerId === 1) {
-        setPlayerOneRolls(rolls);
+      const rolls = await generateRolls(playerId);
+      if (partition === 0) {
+        setPartitionZeroRolls(rolls);
       } else {
-        setPlayerTwoRolls(rolls);
+        setPartitionOneRolls(rolls);
       }
       setCalculated(false);
       setCalculationResult(null);
@@ -50,7 +45,7 @@ export function App() {
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось сгенерировать броски");
     } finally {
-      setLoadingPlayer(null);
+      setLoadingPartition(null);
     }
   }
 
@@ -59,12 +54,7 @@ export function App() {
     setStatus("Идет подсчет результата...");
 
     try {
-      const response = await fetch("/api/calculate");
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      const result = (await response.json()) as CalculationResult;
+      const result = await calculateRound();
       setCalculated(true);
       setCalculationResult(result);
       setStatus(formatResult(result));
@@ -80,18 +70,13 @@ export function App() {
     setStatus("Запускается новый раунд...");
 
     try {
-      const response = await fetch("/api/next-round", { method: "POST" });
-      if (!response.ok) {
-        throw new Error(await readError(response));
-      }
-
-      const next = (await response.json()) as number;
+      const next = await startNextRound();
       setRound(next);
-      setPlayerOneRolls([]);
-      setPlayerTwoRolls([]);
+      setPartitionZeroRolls([]);
+      setPartitionOneRolls([]);
       setCalculated(false);
       setCalculationResult(null);
-      setStatus(initialStatus);
+      setStatus(INITIAL_STATUS);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось начать новый раунд");
     } finally {
@@ -117,125 +102,21 @@ export function App() {
       </header>
 
       <section className="field">
-        <PlayerPanel
+        <PartitionPanel
           partition={0}
-          playerId={1}
-          rolls={playerOneRolls}
-          isLoading={loadingPlayer === 1}
+          rolls={partitionZeroRolls}
+          isLoading={loadingPartition === 0}
           highlightedStep={getHighlightedStep(calculationResult, 0)}
           onGenerate={generate}
         />
-        <PlayerPanel
+        <PartitionPanel
           partition={1}
-          playerId={2}
-          rolls={playerTwoRolls}
-          isLoading={loadingPlayer === 2}
+          rolls={partitionOneRolls}
+          isLoading={loadingPartition === 1}
           highlightedStep={getHighlightedStep(calculationResult, 1)}
           onGenerate={generate}
         />
       </section>
     </main>
   );
-}
-
-function PlayerPanel({
-  playerId,
-  partition,
-  rolls,
-  isLoading,
-  highlightedStep,
-  onGenerate,
-}: {
-  playerId: PlayerId;
-  partition: number;
-  rolls: number[];
-  isLoading: boolean;
-  highlightedStep: number | null;
-  onGenerate: (playerId: PlayerId) => void;
-}) {
-  return (
-    <article className="player">
-      <h2>Партиция {partition}</h2>
-      <button className="generate" disabled={isLoading} onClick={() => onGenerate(playerId)}>
-        {isLoading ? "loading..." : "Сгенерировать 10 бросков"}
-      </button>
-      <ol className="rolls">
-        {rolls.map((roll, index) => (
-          <li
-            className={highlightedStep === index + 1 ? "winning-roll" : undefined}
-            key={`${playerId}-${index}`}
-          >
-            <span>Бросок #{index + 1}</span>
-            <strong>🎲 {roll}</strong>
-          </li>
-        ))}
-      </ol>
-    </article>
-  );
-}
-
-function useRound() {
-  const [round, setRound] = useState<number | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    fetch("/api/round")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Не удалось загрузить номер раунда");
-        }
-        return response.json() as Promise<number>;
-      })
-      .then((value) => {
-        if (isMounted) {
-          setRound(value);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setRound(1);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return [round, setRound] as const;
-}
-
-async function readError(response: Response) {
-  try {
-    const payload = (await response.json()) as { message?: string };
-    return payload.message ?? "Ошибка запроса";
-  } catch {
-    return "Ошибка запроса";
-  }
-}
-
-function formatResult(result: CalculationResult) {
-  if (result.winner === "Ничья") {
-    return result.winningStep === null
-      ? "Ничья. Никто не набрал 30 очков за 10 ходов"
-      : `Ничья. Оба участника набрали 30 очков на ходе #${result.winningStep}`;
-  }
-
-  return `🏆 Победитель: ${formatWinnerName(result.winner)}! Набрал 30 очков за ${result.winningStep} ходов`;
-}
-
-function formatWinnerName(winner: string) {
-  return winner.replace(/^Участник \d+ \(Партиция (\d+)\)$/, "Партиция $1");
-}
-
-function getHighlightedStep(result: CalculationResult | null, partition: number) {
-  if (!result?.winningStep) {
-    return null;
-  }
-  if (result.winner === "Ничья") {
-    return result.winningStep;
-  }
-
-  return formatWinnerName(result.winner) === `Партиция ${partition}` ? result.winningStep : null;
 }
