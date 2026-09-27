@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import ru.bets.domain.ScoreCalculator;
 import ru.bets.exception.RoundValidationException;
 import ru.bets.model.CalculationResult;
 import ru.bets.model.PlayerRolls;

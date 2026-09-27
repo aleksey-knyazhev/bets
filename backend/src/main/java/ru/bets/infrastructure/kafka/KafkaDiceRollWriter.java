@@ -1,4 +1,4 @@
-package ru.bets.service;
+package ru.bets.infrastructure.kafka;
 
 import static ru.bets.config.KafkaTopicConfig.TOPIC_NAME;
 
@@ -13,27 +13,29 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import ru.bets.model.DiceRollMessage;
+import ru.bets.service.DiceRollWriter;
 
 @Component
-public class DiceRollProducer {
+public class KafkaDiceRollWriter implements DiceRollWriter {
 
     private static final int SEND_TIMEOUT_SECONDS = 10;
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public DiceRollProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+    public KafkaDiceRollWriter(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
     }
 
-    public void sendRolls(int round, int partition, List<Integer> rolls) {
+    @Override
+    public void writeRolls(int round, int partition, List<Integer> rolls) {
         for (Integer roll : rolls) {
-            sendRoll(round, partition, roll);
+            writeRoll(round, partition, roll);
         }
     }
 
-    private void sendRoll(int round, int partition, Integer roll) {
+    private void writeRoll(int round, int partition, Integer roll) {
         try {
             String payload = objectMapper.writeValueAsString(new DiceRollMessage(round, roll));
             kafkaTemplate

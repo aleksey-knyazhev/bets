@@ -1,4 +1,4 @@
-package ru.bets.service;
+package ru.bets.domain;
 
 import java.util.List;
 

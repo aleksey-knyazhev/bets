@@ -3,11 +3,10 @@ package ru.bets.service;
 import java.util.List;
 import java.util.concurrent.StructuredTaskScope;
 import java.util.concurrent.StructuredTaskScope.Joiner;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.stereotype.Service;
 
+import ru.bets.domain.ScoreCalculator;
 import ru.bets.exception.RoundValidationException;
 import ru.bets.model.CalculationResult;
 import ru.bets.model.PlayerRolls;
@@ -15,27 +14,32 @@ import ru.bets.model.PlayerRolls;
 @Service
 public class RoundService {
 
-    private final AtomicInteger currentRound = new AtomicInteger(1);
-    private final DiceRollProducer diceRollProducer;
+    private final RoundState roundState;
+    private final RollGenerator rollGenerator;
+    private final DiceRollWriter diceRollWriter;
     private final DiceRollReader diceRollReader;
     private final ScoreCalculator scoreCalculator;
 
     public RoundService(
-            DiceRollProducer diceRollProducer,
+            RoundState roundState,
+            RollGenerator rollGenerator,
+            DiceRollWriter diceRollWriter,
             DiceRollReader diceRollReader,
             ScoreCalculator scoreCalculator
     ) {
-        this.diceRollProducer = diceRollProducer;
+        this.roundState = roundState;
+        this.rollGenerator = rollGenerator;
+        this.diceRollWriter = diceRollWriter;
         this.diceRollReader = diceRollReader;
         this.scoreCalculator = scoreCalculator;
     }
 
     public int getCurrentRound() {
-        return currentRound.get();
+        return roundState.currentRound();
     }
 
     public int nextRound() {
-        return currentRound.incrementAndGet();
+        return roundState.nextRound();
     }
 
     public List<Integer> generate(int playerId) {
@@ -43,19 +47,16 @@ public class RoundService {
             throw new RoundValidationException("playerId должен быть равен 1 или 2");
         }
 
-        int round = currentRound.get();
+        int round = roundState.currentRound();
         int partition = playerId - 1;
-        List<Integer> rolls = ThreadLocalRandom.current()
-                .ints(ScoreCalculator.ROLLS_PER_PARTITION, 1, 7)
-                .boxed()
-                .toList();
+        List<Integer> rolls = rollGenerator.generate(ScoreCalculator.ROLLS_PER_PARTITION);
 
-        diceRollProducer.sendRolls(round, partition, rolls);
+        diceRollWriter.writeRolls(round, partition, rolls);
         return rolls;
     }
 
     public CalculationResult calculate() {
-        int round = currentRound.get();
+        int round = roundState.currentRound();
 
         try (var scope = StructuredTaskScope.open(Joiner.<PlayerRolls>awaitAllSuccessfulOrThrow())) {
             var partitionZeroTask = scope.fork(() -> diceRollReader.readRoundRolls(0, round));
