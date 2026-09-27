@@ -1,4 +1,4 @@
-package ru.bets.round;
+package ru.bets.model;
 
 public record DiceRollMessage(int round, int value) {
 }

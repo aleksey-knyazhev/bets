@@ -1,4 +1,4 @@
-package ru.bets.round;
+package ru.bets.controller;
 
 import java.util.List;
 
@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import ru.bets.model.CalculationResult;
+import ru.bets.service.RoundService;
 
 @RestController
 @RequestMapping("/api")
