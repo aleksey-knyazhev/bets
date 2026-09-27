@@ -1,9 +1,16 @@
-.gradle
+### Gradle ###
+.gradle/
 build/
+backend/build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-.kotlin
+.kotlin/
+
+### Java ###
+*.class
+hs_err_pid*
+replay_pid*
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -39,5 +46,31 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+### Logs ###
+*.log
+logs/
+
+### Environment ###
+.env
+.env.*
+!.env.example
+!.env.*.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+!frontend/.env.*.example
+
+### OS / temporary files ###
 .DS_Store
+Thumbs.db
+*.tmp
+*.temp
