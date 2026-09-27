@@ -1,4 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: changes/001-create-test-table.sql
-      relativeToChangelogFile: true

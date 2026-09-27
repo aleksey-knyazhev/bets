@@ -1,6 +1,6 @@
 # Bets
 
-Application skeleton with Spring Boot 4, Java 25, PostgreSQL, Liquibase, React, TypeScript, and Vite.
+Application skeleton with Spring Boot 4, Java 25, Kafka, React, TypeScript, and Vite.
 
 ## Layout
 
@@ -12,11 +12,13 @@ bets/
 └── settings.gradle.kts
 ```
 
-## Run PostgreSQL
+## Run Kafka
 
 ```bash
-docker compose up -d postgres
+docker compose up -d kafka kafka-ui
 ```
+
+Kafka UI is available at `http://localhost:8081`.
 
 ## Run backend
 
