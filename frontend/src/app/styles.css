@@ -161,9 +161,17 @@ button:disabled {
   justify-content: space-between;
   min-height: 46px;
   gap: 14px;
-  padding: 10px 4px;
+  padding: 10px 8px;
   border-bottom: 1px solid #e1e6ed;
+  border-left: 4px solid transparent;
   font-size: 18px;
+}
+
+.rolls li.winning-roll {
+  border-left-color: #1d8f5f;
+  background: #e7f7ef;
+  color: #0f3f2e;
+  font-weight: 800;
 }
 
 .rolls strong {

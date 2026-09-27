@@ -19,6 +19,7 @@ export function App() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isStartingRound, setIsStartingRound] = useState(false);
   const [calculated, setCalculated] = useState(false);
+  const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [status, setStatus] = useState(initialStatus);
 
   const canCalculate =
@@ -44,6 +45,7 @@ export function App() {
         setPlayerTwoRolls(rolls);
       }
       setCalculated(false);
+      setCalculationResult(null);
       setStatus("Броски загружены. Когда готовы оба участника, запустите подсчет.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось сгенерировать броски");
@@ -64,6 +66,7 @@ export function App() {
 
       const result = (await response.json()) as CalculationResult;
       setCalculated(true);
+      setCalculationResult(result);
       setStatus(formatResult(result));
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось рассчитать результат");
@@ -87,6 +90,7 @@ export function App() {
       setPlayerOneRolls([]);
       setPlayerTwoRolls([]);
       setCalculated(false);
+      setCalculationResult(null);
       setStatus(initialStatus);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Не удалось начать новый раунд");
@@ -118,6 +122,7 @@ export function App() {
           playerId={1}
           rolls={playerOneRolls}
           isLoading={loadingPlayer === 1}
+          highlightedStep={getHighlightedStep(calculationResult, 0)}
           onGenerate={generate}
         />
         <PlayerPanel
@@ -125,6 +130,7 @@ export function App() {
           playerId={2}
           rolls={playerTwoRolls}
           isLoading={loadingPlayer === 2}
+          highlightedStep={getHighlightedStep(calculationResult, 1)}
           onGenerate={generate}
         />
       </section>
@@ -137,12 +143,14 @@ function PlayerPanel({
   partition,
   rolls,
   isLoading,
+  highlightedStep,
   onGenerate,
 }: {
   playerId: PlayerId;
   partition: number;
   rolls: number[];
   isLoading: boolean;
+  highlightedStep: number | null;
   onGenerate: (playerId: PlayerId) => void;
 }) {
   return (
@@ -153,7 +161,10 @@ function PlayerPanel({
       </button>
       <ol className="rolls">
         {rolls.map((roll, index) => (
-          <li key={`${playerId}-${index}`}>
+          <li
+            className={highlightedStep === index + 1 ? "winning-roll" : undefined}
+            key={`${playerId}-${index}`}
+          >
             <span>Бросок #{index + 1}</span>
             <strong>🎲 {roll}</strong>
           </li>
@@ -216,4 +227,15 @@ function formatResult(result: CalculationResult) {
 
 function formatWinnerName(winner: string) {
   return winner.replace(/^Участник \d+ \(Партиция (\d+)\)$/, "Партиция $1");
+}
+
+function getHighlightedStep(result: CalculationResult | null, partition: number) {
+  if (!result?.winningStep) {
+    return null;
+  }
+  if (result.winner === "Ничья") {
+    return result.winningStep;
+  }
+
+  return formatWinnerName(result.winner) === `Партиция ${partition}` ? result.winningStep : null;
 }
