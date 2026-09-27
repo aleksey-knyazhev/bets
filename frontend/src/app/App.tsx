@@ -211,5 +211,9 @@ function formatResult(result: CalculationResult) {
       : `Ничья. Оба участника набрали 30 очков на ходе #${result.winningStep}.`;
   }
 
-  return `🏆 Победитель: ${result.winner}! Набрал 30 очков за ${result.winningStep} ходов.`;
+  return `🏆 Победитель: ${formatWinnerName(result.winner)}! Набрал 30 очков за ${result.winningStep} ходов.`;
+}
+
+function formatWinnerName(winner: string) {
+  return winner.replace(/^Участник \d+ \(Партиция (\d+)\)$/, "Партиция $1");
 }
