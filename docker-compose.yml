@@ -1,4 +1,26 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: bets-backend
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - kafka
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: bets-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   kafka:
     image: apache/kafka:4.1.1
     container_name: bets-kafka
