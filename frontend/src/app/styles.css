@@ -59,7 +59,7 @@ button:disabled {
 }
 
 .round {
-  font-size: clamp(20px, 2vw, 30px);
+  font-size: clamp(18px, 1.6vw, 24px);
   font-weight: 900;
   line-height: 1.1;
 }
@@ -126,7 +126,7 @@ button:disabled {
 
 .player h2 {
   margin: 0;
-  font-size: clamp(24px, 3vw, 40px);
+  font-size: clamp(20px, 2.2vw, 30px);
   line-height: 1.1;
   text-align: center;
 }

@@ -149,7 +149,7 @@ public class RoundService {
             List<Integer> currentRolls = rolls.size() <= ROLLS_PER_PLAYER
                     ? rolls
                     : rolls.subList(rolls.size() - ROLLS_PER_PLAYER, rolls.size());
-            return score("Участник " + (partition + 1) + " (Партиция " + partition + ")", currentRolls);
+            return score("Партиция " + partition, currentRolls);
         }
     }
 

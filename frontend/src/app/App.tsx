@@ -29,7 +29,7 @@ export function App() {
 
   async function generate(playerId: PlayerId) {
     setLoadingPlayer(playerId);
-    setStatus(`Генерируются броски участника ${playerId}...`);
+    setStatus(`Генерируются броски для Партиция ${playerId - 1}...`);
 
     try {
       const response = await fetch(`/api/generate/${playerId}`, { method: "POST" });
@@ -147,9 +147,7 @@ function PlayerPanel({
 }) {
   return (
     <article className="player">
-      <h2>
-        Участник {playerId} <span>(Партиция {partition})</span>
-      </h2>
+      <h2>Партиция {partition}</h2>
       <button className="generate" disabled={isLoading} onClick={() => onGenerate(playerId)}>
         {isLoading ? "loading..." : "Сгенерировать 10 бросков"}
       </button>
