@@ -57,6 +57,7 @@ frontend/vite.config.d.ts
 
 ### Logs ###
 *.log
+frontend/vite.err
 logs/
 
 ### Environment ###

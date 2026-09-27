@@ -7,20 +7,16 @@ spring:
   threads:
     virtual:
       enabled: true
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
-    hikari:
-      connection-init-sql: CREATE SCHEMA IF NOT EXISTS bets
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-  liquibase:
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
-    default-schema: bets
-    liquibase-schema: bets
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: bets-round-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 management:
   endpoints:
