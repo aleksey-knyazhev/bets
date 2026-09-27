@@ -25,6 +25,20 @@ Backend отправляет сгенерированные броски в Kafk
 - frontend: React, TypeScript, Vite
 - инфраструктура: Docker Compose, Kafka UI
 
+## Скриншоты
+
+Победа "Партиция 0"
+![Победа "Партиция 0"](screenshots/01.png)
+
+Ничья
+![Ничья](screenshots/02.png)
+
+Структура партиций Kafka
+![Структура партиций Kafka](screenshots/03.png)
+
+Наполнение партиций Kafka
+![Наполнение партиций Kafka](screenshots/04.png)
+
 ## Запуск через Docker
 
 ```bash
