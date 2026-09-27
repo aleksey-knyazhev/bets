@@ -104,7 +104,7 @@ export function App() {
         </div>
         <div className="controls">
           <button className="primary" disabled={!canCalculate} onClick={calculate}>
-            {isCalculating ? "loading..." : "🎲 ПОДСЧЕТ РЕЗУЛЬТАТА"}
+            {isCalculating ? "loading..." : "🎲 Подсчет результата"}
           </button>
           <button disabled={isStartingRound} onClick={nextRound}>
             {isStartingRound ? "loading..." : "🔄 НОВЫЙ РАУНД"}
