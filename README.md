@@ -97,7 +97,7 @@ docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d backend fro
 $env:E2E_BASE_URL = "http://frontend"
 $env:SELENIDE_REMOTE = "http://localhost:4444"
 ./gradlew.bat :backend:e2eTest
-docker compose stop backend frontend kafka selenium
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml stop backend frontend kafka selenium
 ```
 
 GitLab runner для Kafka Testcontainers и браузерного этапа должен поддерживать Docker-in-Docker в privileged-режиме.
