@@ -50,3 +50,54 @@ docker compose up --build -d
 - backend: `http://localhost:8082`
 - Kafka UI: `http://localhost:8081`
 - Kafka broker: `localhost:9092`
+
+## Автоматизированные тесты
+
+Backend unit-, API- и Kafka-интеграционные тесты запускаются командой:
+
+```bash
+./gradlew :backend:test
+```
+
+Для Kafka-интеграционных тестов нужен Docker.
+
+Frontend component-тесты и production-сборка:
+
+```bash
+cd frontend
+npm ci
+npm test
+npm run build
+```
+
+Браузерные тесты используют Selenide. Если Chrome установлен локально, запустите приложение:
+
+```bash
+docker compose up -d backend frontend kafka
+```
+
+Затем запустите отдельную Gradle-задачу. В PowerShell:
+
+```powershell
+$env:E2E_BASE_URL = "http://localhost:5173"
+Remove-Item Env:SELENIDE_REMOTE -ErrorAction SilentlyContinue
+./gradlew.bat :backend:e2eTest
+docker compose stop backend frontend kafka
+```
+
+Для удалённого Chrome, как в GitLab CI, используйте дополнительный Compose-файл:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d backend frontend kafka selenium
+```
+
+В PowerShell перед запуском Gradle укажите URL страницы и Selenium WebDriver:
+
+```powershell
+$env:E2E_BASE_URL = "http://frontend"
+$env:SELENIDE_REMOTE = "http://localhost:4444"
+./gradlew.bat :backend:e2eTest
+docker compose stop backend frontend kafka selenium
+```
+
+GitLab runner для Kafka Testcontainers и браузерного этапа должен поддерживать Docker-in-Docker в privileged-режиме.

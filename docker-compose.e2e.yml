@@ -1,0 +1,8 @@
+services:
+  selenium:
+    image: selenium/standalone-chrome:4.35.0
+    shm_size: 2gb
+    ports:
+      - "4444:4444"
+    depends_on:
+      - frontend

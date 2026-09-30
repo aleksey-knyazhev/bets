@@ -61,6 +61,28 @@ class ScoreCalculatorTest {
     }
 
     @Test
+    void returnsWinnerWhenItReachesWinningScoreOnTenthRoll() {
+        CalculationResult result = scoreCalculator.calculate(
+                rolls(0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3),
+                rolls(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+        );
+
+        assertThat(result.winner()).isEqualTo("Партиция 0");
+        assertThat(result.winningStep()).isEqualTo(10);
+    }
+
+    @Test
+    void choosesThePartitionThatReachesTheTargetOnTheEarlierRoll() {
+        CalculationResult result = scoreCalculator.calculate(
+                rolls(0, 4, 4, 4, 4, 4, 4, 4, 2, 1, 1),
+                rolls(1, 6, 6, 6, 6, 6, 1, 1, 1, 1, 1)
+        );
+
+        assertThat(result.winner()).isEqualTo("Партиция 1");
+        assertThat(result.winningStep()).isEqualTo(5);
+    }
+
+    @Test
     void rejectsIncompleteRound() {
         assertThatThrownBy(() -> scoreCalculator.calculate(
                 new PlayerRolls(0, List.of(1, 2, 3)),

@@ -19,8 +19,11 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:kafka:1.21.4")
+    testImplementation("com.codeborne:selenide:7.10.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -29,7 +32,21 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags("e2e")
+    }
+    jvmArgs("--enable-preview")
+}
+
+val e2eTest by tasks.registering(Test::class) {
+    description = "Runs browser-based end-to-end tests"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("e2e")
+    }
+    shouldRunAfter(tasks.test)
     jvmArgs("--enable-preview")
 }
 

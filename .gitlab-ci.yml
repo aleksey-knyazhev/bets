@@ -1,0 +1,51 @@
+stages:
+  - verify
+  - e2e
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-cache"
+
+backend_tests:
+  stage: verify
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_TLS_CERTDIR: ""
+    TESTCONTAINERS_HOST_OVERRIDE: "docker"
+  script:
+    - ./gradlew --no-daemon :backend:test
+
+frontend_tests:
+  stage: verify
+  image: node:24
+  script:
+    - cd frontend
+    - npm ci
+    - npm test
+    - npm run build
+
+browser_e2e:
+  stage: e2e
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_CONFIG: "$CI_PROJECT_DIR/.docker"
+  before_script:
+    - apt-get update && apt-get install -y curl docker.io
+    - mkdir -p "$DOCKER_CONFIG/cli-plugins"
+    - curl -fsSL https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-linux-x86_64 -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
+    - chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
+  script:
+    - docker compose -f docker-compose.yml -f docker-compose.e2e.yml up --build -d
+    - curl --retry 60 --retry-delay 2 --retry-connrefused http://docker:4444/status
+    - curl --retry 60 --retry-delay 2 --retry-connrefused http://docker:5173
+    - E2E_BASE_URL=http://frontend SELENIDE_REMOTE=http://docker:4444 ./gradlew --no-daemon :backend:e2eTest
+  after_script:
+    - docker compose -f docker-compose.yml -f docker-compose.e2e.yml down --remove-orphans || true
