@@ -61,6 +61,14 @@ Backend unit-, API- и Kafka-интеграционные тесты запус�
 
 Для Kafka-интеграционных тестов нужен Docker.
 
+REST acceptance-тесты обращаются к запущенному по HTTP Spring Boot backend и используют Kafka из Testcontainers:
+
+```bash
+./gradlew :backend:acceptanceTest
+```
+
+Для acceptance-тестов также нужен работающий Docker Desktop.
+
 Frontend component-тесты и production-сборка:
 
 ```bash

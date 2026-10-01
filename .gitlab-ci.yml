@@ -18,6 +18,19 @@ backend_tests:
   script:
     - ./gradlew --no-daemon :backend:test
 
+backend_acceptance:
+  stage: verify
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_TLS_CERTDIR: ""
+    TESTCONTAINERS_HOST_OVERRIDE: "docker"
+  script:
+    - ./gradlew --no-daemon :backend:acceptanceTest
+
 frontend_tests:
   stage: verify
   image: node:24

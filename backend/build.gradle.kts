@@ -33,7 +33,7 @@ tasks.withType<JavaCompile> {
 
 tasks.test {
     useJUnitPlatform {
-        excludeTags("e2e")
+        excludeTags("e2e", "acceptance")
     }
     jvmArgs("--enable-preview")
 }
@@ -45,6 +45,18 @@ val e2eTest by tasks.registering(Test::class) {
     classpath = sourceSets.test.get().runtimeClasspath
     useJUnitPlatform {
         includeTags("e2e")
+    }
+    shouldRunAfter(tasks.test)
+    jvmArgs("--enable-preview")
+}
+
+val acceptanceTest by tasks.registering(Test::class) {
+    description = "Runs REST acceptance tests against the application and Kafka"
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform {
+        includeTags("acceptance")
     }
     shouldRunAfter(tasks.test)
     jvmArgs("--enable-preview")
